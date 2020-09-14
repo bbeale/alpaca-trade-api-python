@@ -78,14 +78,14 @@ def test_polygon(reqmock):
 
     reqmock.get(
         endpoint(
-            '/aggs/ticker/AAPL/range/1/day/2018-02-02/2018-02-05',
+            '/aggs/ticker/AAPL/range/1/day/2018-02-02/2018-02-06',
             params='unadjusted=False', api_version='v2'
         ),
         text=aggs_response)
 
     reqmock.get(
         endpoint(
-            '/aggs/ticker/AAPL/range/1/day/1546300800000/2018-02-05',
+            '/aggs/ticker/AAPL/range/1/day/1546300800000/2018-02-06',
             params='unadjusted=False', api_version='v2'
         ),
         text=aggs_response)
@@ -254,3 +254,51 @@ def test_polygon(reqmock):
 
     with pytest.raises(ValueError):
         cli.company(['AAPL'] * 51)
+
+    # paginated symbol list
+    reqmock.get(
+        endpoint('/reference/tickers', api_version='v2'),
+        text='''
+{"page": 1, "perPage": 30, "count": 32657, "status": "OK", "tickers": [
+  {
+    "ticker": "AAPL",
+    "name": "Apple Inc.",
+    "market": "STOCKS",
+    "locale": "US",
+    "currency": "USD",
+    "active": true,
+    "primaryExch": "NGS",
+    "type": "cs",
+    "codes": {
+      "cik": "0000320193",
+      "figiuid": "EQ0010169500001000",
+      "scfigi": "BBG001S5N8V8",
+      "cfigi": "BBG000B9XRY4",
+      "figi": "BBG000B9Y5X2"
+    },
+    "updated": "2019-01-15T05:21:28.437Z",
+    "url": "https://api.polygon.io/v2/reference/tickers/AAPL"
+  },
+  {
+    "ticker": "GOOG",
+    "name": "Google Inc.",
+    "market": "STOCKS",
+    "locale": "US",
+    "currency": "USD",
+    "active": true,
+    "primaryExch": "NGS",
+    "type": "cs",
+    "codes": {
+      "cik": "0000320193",
+      "figiuid": "EQ0010169500001000",
+      "scfigi": "BBG001S5N8V8",
+      "cfigi": "BBG000B9XRY4",
+      "figi": "BBG000B9Y5X2"
+    },
+    "updated": "2019-01-15T05:21:28.437Z",
+    "url": "https://api.polygon.io/v2/reference/tickers/GOOG"
+  }
+]}''')
+    cli.symbol_list_paginated(1, 2)
+    # nothing to assert in the mock data. jsut checking params are parsed
+    # correctly

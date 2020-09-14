@@ -102,6 +102,9 @@ def test_orders(reqmock):
     "filled_at": "2018-03-09T19:05:27Z",
     "failed_at": "2018-03-09T19:05:27Z",
     "filled_qty": "0",
+    "hwm": null,
+    "trail_percent": null,
+    "trail_price": null,
     "failured_reason": "string",
     "cancel_requested_at": "2018-03-09T19:05:27Z",
     "submitted_at": "2018-03-09T19:05:27Z"
@@ -133,6 +136,9 @@ def test_orders(reqmock):
   "filled_at": "2018-03-09T19:05:27Z",
   "failed_at": "2018-03-09T19:05:27Z",
   "filled_qty": "0",
+  "hwm": null,
+  "trail_percent": null,
+  "trail_price": null,
   "failured_reason": "string",
   "cancel_requested_at": "2018-03-09T19:05:27Z",
   "submitted_at": "2018-03-09T19:05:27Z"
@@ -149,6 +155,49 @@ def test_orders(reqmock):
     )
     assert order.qty == "15"
     assert order.created_at.hour == 19
+    # now let's test some different acceptable "float" formats
+    api.submit_order(
+        symbol='904837e3-3b76-47ec-b432-046db621571b',
+        qty=15,
+        side='buy',
+        type='market',
+        time_in_force='day',
+        limit_price='107.00',  # str float
+        stop_price=106.00,  # float
+        client_order_id='904837e3-3b76-47ec-b432-046db621571b',
+    )
+    api.submit_order(
+        symbol='904837e3-3b76-47ec-b432-046db621571b',
+        qty=15,
+        side='buy',
+        type='market',
+        time_in_force='day',
+        limit_price='107.00',  # str float
+        stop_price=106,  # int
+        client_order_id='904837e3-3b76-47ec-b432-046db621571b',
+    )
+    with pytest.raises(ValueError):
+        api.submit_order(
+            symbol='904837e3-3b76-47ec-b432-046db621571b',
+            qty=15,
+            side='buy',
+            type='market',
+            time_in_force='day',
+            limit_price='1',
+            stop_price="a",
+            client_order_id='904837e3-3b76-47ec-b432-046db621571b',
+        )
+    with pytest.raises(ValueError):
+        api.submit_order(
+            symbol='904837e3-3b76-47ec-b432-046db621571b',
+            qty=15,
+            side='buy',
+            type='market',
+            time_in_force='day',
+            limit_price='a',
+            stop_price=106.00,
+            client_order_id='904837e3-3b76-47ec-b432-046db621571b',
+        )
 
     # Get an order by client order id
     client_order_id = 'client-order-id'
@@ -175,6 +224,9 @@ def test_orders(reqmock):
   "filled_at": "2018-03-09T05:50:50Z",
   "failed_at": "2018-03-09T05:50:50Z",
   "filled_qty": "0",
+  "hwm": null,
+  "trail_percent": null,
+  "trail_price": null,
   "failured_reason": "string",
   "cancel_requested_at": "2018-03-09T05:50:50Z",
   "submitted_at": "2018-03-09T05:50:50Z"
@@ -206,6 +258,9 @@ def test_orders(reqmock):
   "filled_at": "2018-03-09T05:50:50Z",
   "failed_at": "2018-03-09T05:50:50Z",
   "filled_qty": "0",
+  "hwm": null,
+  "trail_percent": null,
+  "trail_price": null,
   "failured_reason": "string",
   "cancel_requested_at": "2018-03-09T05:50:50Z",
   "submitted_at": "2018-03-09T05:50:50Z"

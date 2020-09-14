@@ -1,7 +1,5 @@
-pandas
-requests
-urllib3<1.25
-websocket-client
-websockets>=8.0
-deprecated
-alpha_vantage
+pandas  # pyup: ignore 
+requests>2,<3
+urllib3>1.24,<1.26
+websocket-client>=0.56.0,<1
+websockets>=8.0,<9

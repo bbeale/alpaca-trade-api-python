@@ -41,6 +41,20 @@ class DATE(str):
         return str.__new__(cls, value)
 
 
+class FLOAT(str):
+    """
+    api allows passing floats or float as strings.
+    let's make sure that param passed is one of the two, so we don't pass
+    invalid strings all the way to the servers.
+    """
+    def __new__(cls, value):
+        if isinstance(value, float) or isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            return float(value.strip())
+        raise ValueError(f'Unexpected float format "{value}"')
+
+
 def get_base_url() -> URL:
     return URL(os.environ.get(
         'APCA_API_BASE_URL', 'https://api.alpaca.markets').rstrip('/'))
@@ -78,14 +92,6 @@ def get_polygon_credentials(alpaca_key: str = None) -> str:
     if key_id is None:
         raise ValueError('Key ID must be given to access Polygon API'
                          ' (env: APCA_API_KEY_ID or POLYGON_KEY_ID)')
-    return key_id
-
-
-def get_alpha_vantage_credentials(alpha_vantage_key: str = None) -> str:
-    key_id = alpha_vantage_key or os.environ.get('ALPHAVANTAGE_API_KEY')
-    if key_id is None:
-        raise ValueError('Key ID must be given to access Alpha Vantage API'
-                         ' (env: ALPHAVANTAGE_API_KEY)')
     return key_id
 
 

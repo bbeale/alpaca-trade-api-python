@@ -2,6 +2,9 @@ import asyncio
 import json
 import os
 import re
+import traceback
+from asyncio import CancelledError
+
 import websockets
 from .common import get_base_url, get_data_url, get_credentials, URL
 from .entity import Account, Entity, trade_mapping, agg_mapping, quote_mapping
@@ -57,7 +60,7 @@ class _StreamConn(object):
 
         self._ws = ws
         await self._dispatch('authorized', msg)
-
+        logging.info(f"connected to: {self._endpoint}")
         self._consume_task = asyncio.ensure_future(self._consume_msg())
 
     async def consume(self):
@@ -181,7 +184,9 @@ class StreamConn(object):
             secret_key: str = None,
             base_url: URL = None,
             data_url: URL = None,
-            data_stream: str = None):
+            data_stream: str = None,
+            debug: bool = False
+    ):
         self._key_id, self._secret_key, _ = get_credentials(key_id, secret_key)
         self._base_url = base_url or get_base_url()
         self._data_url = data_url or get_data_url()
@@ -194,6 +199,7 @@ class StreamConn(object):
         else:
             _data_stream = 'alpacadatav1'
         self._data_stream = _data_stream
+        self._debug = debug
 
         self.trading_ws = _StreamConn(self._key_id,
                                       self._secret_key,
@@ -289,7 +295,10 @@ class StreamConn(object):
                 logging.info("Exiting on Interrupt")
                 should_renew = False
             except Exception as e:
-                logging.error(f"error while consuming ws messages: {e}")
+                m = 'consume cancelled' if isinstance(e, CancelledError) else e
+                logging.error(f"error while consuming ws messages: {m}")
+                if self._debug:
+                    traceback.print_exc()
                 loop.run_until_complete(self.close(should_renew))
                 if loop.is_running():
                     loop.close()
